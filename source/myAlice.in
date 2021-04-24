@@ -1,0 +1,58 @@
+%constants:Alice, Husband(sotul lui Alice),Son(fiul lui Alice),Daughter(fiica lui Alice)
+%Brother(fratele lui Alice)
+
+%Alice,Alice's husband,their son,their daughter and Alice's brother where
+%involved in a murder. One of the five killed one of the four. The following
+%facts refer to the five people mentoned:
+% 1. A man and a woman were together in a bar at the time of the murder
+% 2. The victim and the killer were together on a beach al the time of the murder
+% 3. One of Alice's two children was alone at the time of the murder
+% 4. Alice and her husband were not togheter at the time of the murder
+% 5. The victim's twin was not the killer
+% 6. The killer was younger than victim
+
+% a- Alice
+% h- Husband
+% s- Son
+% d- Daughter
+% b -Brother
+
+assign(max_seconds, 30).
+assign(domain_size, 5).
+assign(max_models, -1).
+
+formulas(assumption).
+
+ all x all y (differentFrom(x,y) ->  differentFrom(y,x)).
+
+ differentFrom(a,h).
+ differentFrom(a,s).
+ differentFrom(a,d).
+ differentFrom(a,b).
+ differentFrom(h,s).
+ differentFrom(h,d).
+ differentFrom(h,b).
+ differentFrom(s,d).
+ differentFrom(s,b).
+ differentFrom(d,b).
+ 
+ killer(a) |  killer(h) |  killer(s) |  killer(d) |  killer(b).
+ victim(a) |  victim(h) |  victim(s) |  victim(d) |  victim(b).
+ 
+ man(h) & man(s) & man(b).
+ woman(a) & woman(d).
+ all x all y (bar(x,y) -> -(beach(x,y)) & -alone(x) & -alone(y)). 
+ all x all y (beach(x,y) -> -(bar(x,y)) & -alone(x) & -alone(y)). 
+ all x all y (together(x,y) -> -alone(x) & -alone(y)). 
+ 
+ twins(a,b).
+ twins(d,s).
+
+ all x all y (man(x) & woman(y) -> bar(x,y)).
+ all x all y (victim(x) & killer(y) -> beach(x,y)).
+ alone(s) | alone(d).
+ -together(a,h).
+ all x all y (killer(x) & victim(y) -> -twins(x,y)).
+end_of_list.
+
+

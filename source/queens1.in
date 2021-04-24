@@ -1,0 +1,20 @@
+set(arithmetic).
+assign(max_models, -1).
+assign(domain_size, 4).
+
+
+% Relatia Queen(a)=n reprezinta faptul ca este o regina pe randul i coloana n,prin aceasta
+% remarca curpindem si faptul ca nu exista nici o regina pe tabla de joc.
+
+formulas(assumptions).
+
+%Aici reprezentam ca nu exista doua regine pe aceeasi coloana
+x != y -> Q(x) != Q(y).
+
+%Nu exista doua regine pe diagonala stanga
+x != y -> y + -x != Q(y) + -Q(x).
+
+%Nu exista doua regine pe diagonala dreapta
+x != y -> y + -x != Q(x) + -Q(y).
+
+end_of_list.

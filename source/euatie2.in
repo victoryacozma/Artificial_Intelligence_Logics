@@ -1,0 +1,18 @@
+set(arithmetic).
+assign(max_models, -1).
+assign(domain_size, 10).
+
+list(distinct).
+ [0,A,B,C,D,E,F,G,H,I].
+end_of_list.
+
+formulas(assumption).
+
+2*E = B + F.
+2*A = D + F.
+2*H = D + E.
+2*C = H + I.
+F > G.
+I > D.
+
+end_of_list. 

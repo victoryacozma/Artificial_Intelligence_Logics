@@ -1,0 +1,114 @@
+set(arithmetic).
+assign(max_seconds, 30).
+assign(domain_size, 4).
+assign(max_models, -1).
+
+% Predicatele definite:
+% smell(x,y) - exista miros in celula cu coordonatele (x,y)
+% breeze(x,y) - exista briza in celula cu coordonatele (x,y)
+% pit(x,y) - celula (x,y) contine groapa
+% wumpus(x,y) - wumpus-ul e in celula (x,y)
+% gold(x,y) - celula (x,y) contine comoara
+% safe(x,y) - celula care este safe
+
+
+
+formulas(assumptions).
+
+ % O celula este adiacenta cu celula (x,y) daca se afla la dreapta, stanga, sus sau jos fata de celula
+ 
+ ds = domain_size + -1.
+ x < ds -> inc(x) = x + 1.
+ inc(ds) = dec(ds).
+ x > 0 -> dec(x) = x + -1.
+ dec(0) = inc(0).
+ 
+ % Exista wumpus si gold
+ exists x exists y (wumpus(x,y)).
+ exists x exists y (gold(x,y)).
+ 
+ % Celula e safe daca nu exista wumpus si groapa in ea.
+ all x all y (safe(x,y) <-> -wumpus(x,y) & -pit(x,y)).
+ 
+ 
+ % Daca wumpus-ul e in celula (x,y) atunci persista miros in celulele adiacente.
+ all x all y (wumpus(x,y) -> smell(x, y)).
+ all x all y (wumpus(x,y) -> smell(inc(x), y)).
+ all x all y (wumpus(x,y) -> smell(dec(x), y)).
+ all x all y (wumpus(x,y) -> smell(x, inc(y))).
+ all x all y (wumpus(x,y) -> smell(x, dec(y))).
+
+
+ % Daca suntem intr-o celula cu smell, atunci avem un wumpus in una din celulele adiacent.
+ all x all y (smell(x,y) -> wumpus(x, y) | wumpus(inc(x), y) | wumpus(dec(x), y) | wumpus(x, inc(y)) | wumpus(x, dec(y))).
+ 
+ 
+ % Daca avem groapa in celula (x,y) atunci avem briza in celulele adiacente.
+ all x all y (pit(x,y) -> breeze(inc(x), y)).
+ all x all y (pit(x,y) -> breeze(dec(x), y)).
+ all x all y (pit(x,y) -> breeze(x, inc(y))).
+ all x all y (pit(x,y) -> breeze(x, dec(y))).
+ 
+ % Daca suntem intr-o celula in care simtim briza, atunci intr-una din celulele adiacente e groapa.
+ all x all y (breeze(x,y) -> pit(inc(x), y) | pit(dec(x), y) | pit(x, inc(y)) | pit(x, dec(y))).
+ 
+ 
+ % Wumpus-ul nu poate exista in aceasi celula cu groapa si cu comoara.
+ all x all y (wumpus(x,y) -> -pit(x,y)).
+ all x all y (wumpus(x,y) -> -gold(x,y)).
+ 
+ % Comoara nu poate fi celula cu groapa si nici in celula cu wumpus-ul.
+ all x all y (gold(x,y) -> -pit(x,y)).
+ all x all y (pit(x,y) -> -gold(x,y)).
+ 
+ % Wumpus ul e unic
+ all x all y (wumpus(x,y) -> -(exists z exists w (wumpus(z,w) & z != x & w != y))). %pe diagonala
+ all x all y (wumpus(x,y) -> -(exists z (wumpus(z,y) & z != x))). %pe coloana
+ all x all y (wumpus(x,y) -> -(exists z (wumpus(x,z) & z != y))). %pe linie
+
+ % Gold-ul e unic
+ all x all y (gold(x,y) -> -(exists z exists w (gold(z,w) & z != x & w != y))). %pe diagonala
+ all x all y (gold(x,y) -> -(exists z (gold(z,y) & 
+ z != x))). %pe linie
+ all x all y (gold(x,y) -> -(exists z (gold(x,z) & z != y))). %pe coloana
+ 
+ 
+ % Indiciile pe care le primeste agentul
+
+ % Agentul porneste din celula (3,3) (stanga jos)
+ safe(3,0).
+ 
+ % Simte miros in (2,0) si briza in (3,1)
+ smell(2,0).
+ breeze(3,1).
+ 
+ % Tot randul 2 este safe
+ all y (safe(2,y)).
+ 
+ % Descopera briza in celula (2,2).
+ breeze(2,2).
+ 
+ % Urmatorul indiciu: toate celulele de pe diagonala sunt safe
+ all x (safe(x,x)).
+ 
+ % Gaseste briza din (3,3) si descopera pit-ul din (3,2). Urmatorul indiciu: avem un singur pit pe rand si coloana
+ all x all y (pit(x,y) -> -(exists z (pit(z,y) & z != x))).
+ all x all y (pit(x,y) -> -(exists z (pit(x,z) & z != y))).
+ 
+ %Merge in sus pe coloana 2 si descopera briza in (0,2)
+ breeze(0,2).
+ safe(0,1).
+ 
+ %Comoara nu poate fi in aceeasi celula cu briza
+ all x all y (breeze(x,y) -> -gold(x,y)).
+ 
+ %Comoara e e diagonala principala
+ gold(x,y) -> x = y.
+ 
+ %Comoara nu e in celula (0,0).
+ -gold(0,0).
+
+ end_of_list.
+ 
+ formulas(goals).
+ end_of_list.
